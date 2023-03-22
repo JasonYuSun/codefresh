@@ -1,13 +1,12 @@
 #!/bin/sh
 
-CODEFRESH_API_KEY="YOUR_CODEFRESH_API_KEY"
 TIME_24_HOURS_AGO=$(date -u -d "24 hours ago" +%Y-%m-%dT%H:%M:%SZ)
 
 jq -c '.[] | select(.spec.runtime.variables[]? | select(.key == "AUTO_APPROVE" and .value == "true"))' pipelines.json | while read -r pipeline; do
   PIPELINE_ID=$(echo "${pipeline}" | jq -r '.metadata.id')
   PIPELINE_NAME=$(echo "${pipeline}" | jq -r '.metadata.name')
 
-  LAST_SUCCESS_BUILD=$(curl -s -H "Authorization: ${CODEFRESH_API_KEY}" "https://g.codefresh.io/api/builds?pipelineId=${PIPELINE_ID}&status=success&limit=1" | jq '.[0]')
+  LAST_SUCCESS_BUILD=$(codefresh get builds --pipeline-id="${PIPELINE_ID}" --status=success --limit=1 -o json | jq '.[0]')
   if [ "${LAST_SUCCESS_BUILD}" != "null" ]; then
     LAST_SUCCESS_BUILD_TIME=$(echo "${LAST_SUCCESS_BUILD}" | jq -r '.finished')
 

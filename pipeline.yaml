@@ -23,7 +23,7 @@ steps:
 
   check_pipeline_status:
     title: "Check pipeline status in the last 24 hours"
-    image: "alpine"
+    image: "codefresh/cfstep-cli:latest"
     stage: "check_pipeline_status"
     commands:
       - 'apk add --no-cache jq'
@@ -31,7 +31,7 @@ steps:
 
   invoke_pipelines:
     title: "Invoke pipelines if not run successfully in the last 24 hours"
-    image: "alpine"
+    image: "codefresh/cfstep-cli:latest"
     stage: "invoke_pipelines"
     commands:
       - 'apk add --no-cache jq curl'
@@ -39,7 +39,7 @@ steps:
 
   generate_report:
     title: "Generate markdown report of failed pipelines"
-    image: "alpine"
+    image: "codefresh/cfstep-cli:latest"
     stage: "generate_report"
     commands:
       - 'apk add --no-cache jq'
@@ -47,7 +47,7 @@ steps:
 
   cleanup:
     title: "Clean up generated files"
-    image: "alpine"
+    image: "codefresh/cfstep-cli:latest"
     stage: "cleanup"
     commands:
       - 'rm -f pipelines.json pipelines_to_invoke.txt failed_pipelines_report.md

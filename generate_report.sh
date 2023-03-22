@@ -1,23 +1,13 @@
 #!/bin/sh
 
-CODEFRESH_API_KEY="YOUR_CODEFRESH_API_KEY"
+if [ -f pipelines_to_invoke.txt ]; then
+  echo "# Failed Pipelines Report" > failed_pipelines_report.md
+  echo "The following pipelines have not run successfully in the last 24 hours:" >> failed_pipelines_report.md
+  echo "" >> failed_pipelines_report.md
 
-echo "# Failed Pipelines" > failed_pipelines_report.md
-echo "" >> failed_pipelines_report.md
-
-jq -c '.[]' pipelines.json | while read -r pipeline; do
-  PIPELINE_ID=$(echo "${pipeline}" | jq -r '.metadata.id')
-  PIPELINE_NAME=$(echo "${pipeline}" | jq -r '.metadata.name')
-
-  LAST_BUILD=$(curl -s -H "Authorization: ${CODEFRESH_API_KEY}" "https://g.codefresh.io/api/builds?pipelineId=${PIPELINE_ID}&limit=1" | jq '.[0]')
-  if [ "${LAST_BUILD}" != "null" ]; then
-    LAST_BUILD_STATUS=$(echo "${LAST_BUILD}" | jq -r '.status')
-
-    if [ "${LAST_BUILD_STATUS}" != "success" ]; then
-      echo "## ${PIPELINE_NAME}" >> failed_pipelines_report.md
-      echo "" >> failed_pipelines_report.md
-      echo "- Last build status: ${LAST_BUILD_STATUS}" >> failed_pipelines_report.md
-      echo "" >> failed_pipelines_report.md
-    fi
-  fi
-done
+  while read -r pipeline_name; do
+    echo "- ${pipeline_name}" >> failed_pipelines_report.md
+  done < pipelines_to_invoke.txt
+else
+  echo "All pipelines have run successfully in the last 24 hours."
+fi
