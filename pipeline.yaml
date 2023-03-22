@@ -1,0 +1,53 @@
+version: "1.0"
+stages:
+  - "prepare"
+  - "check_pipeline_status"
+  - "invoke_pipelines"
+  - "generate_report"
+  - "cleanup"
+
+steps:
+  main_clone:
+    title: "Cloning main repository"
+    type: "git-clone"
+    repo: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
+    revision: "${{CF_REVISION}}"
+    stage: "prepare"
+
+  get_pipelines:
+    title: "Get all pipelines in the account"
+    image: "codefresh/cfstep-cli:latest"
+    stage: "prepare"
+    commands:
+      - 'codefresh get pipelines -o json > pipelines.json'
+
+  check_pipeline_status:
+    title: "Check pipeline status in the last 24 hours"
+    image: "alpine"
+    stage: "check_pipeline_status"
+    commands:
+      - 'apk add --no-cache jq'
+      - 'sh check_pipeline_status.sh'
+
+  invoke_pipelines:
+    title: "Invoke pipelines if not run successfully in the last 24 hours"
+    image: "alpine"
+    stage: "invoke_pipelines"
+    commands:
+      - 'apk add --no-cache jq curl'
+      - 'sh invoke_pipelines.sh'
+
+  generate_report:
+    title: "Generate markdown report of failed pipelines"
+    image: "alpine"
+    stage: "generate_report"
+    commands:
+      - 'apk add --no-cache jq'
+      - 'sh generate_report.sh'
+
+  cleanup:
+    title: "Clean up generated files"
+    image: "alpine"
+    stage: "cleanup"
+    commands:
+      - 'rm -f pipelines.json pipelines_to_invoke.txt failed_pipelines_report.md
