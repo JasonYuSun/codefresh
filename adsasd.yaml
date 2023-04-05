@@ -1,0 +1,28 @@
+configure_and_delete_buckets:
+  title: "Configuring Google Cloud SDK and Force Deleting Buckets"
+  image: "google/cloud-sdk:latest"
+  stage: "delete-buckets"
+  commands:
+    - "gcloud auth activate-service-account --key-file=${{GCLOUD_SERVICE_ACCOUNT_KEY}}"
+    - "gcloud config set project $GCLOUD_PROJECT"
+    - |
+      function force_delete_bucket() {
+        local BUCKET_NAME="$1"
+        echo "Deleting all objects in the bucket: ${BUCKET_NAME}"
+        
+        # Delete all objects within the bucket
+        gsutil -m rm -r "gs://${BUCKET_NAME}/**"
+
+        echo "Deleting the bucket: ${BUCKET_NAME}"
+        
+        # Delete the bucket itself
+        gsutil rb "gs://${BUCKET_NAME}"
+      }
+
+      BUCKET_NAME_1="your-bucket-name-1"
+      BUCKET_NAME_2="your-bucket-name-2"
+
+      force_delete_bucket "${BUCKET_NAME_1}"
+      force_delete_bucket "${BUCKET_NAME_2}"
+
+      echo "Both buckets have been forcefully deleted."
