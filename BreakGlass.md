@@ -3,8 +3,12 @@ Title: Cleaning Up GCP Service Accounts Created by Partial Terraform Execution U
 I. Introduction (50 words)
 In this article, we will discuss how to clean up Google Cloud Platform (GCP) service accounts created by partial Terraform execution using an existing break glass Codefresh pipeline. This guide is designed for beginner DevOps engineers who want to keep their GCP resources tidy.
 
+Try manually delete it first.
+
 II. Understanding Terraform Plan and Apply Issues (100 words)
 Terraform uses the 'plan' command to generate an execution plan, detailing the actions required to reach the desired infrastructure state. The 'apply' command executes the plan. However, sometimes 'plan' may succeed while 'apply' fails due to issues such as API errors, timeouts, or missing dependencies. This may result in the creation of unexpected GCP resources, such as orphaned service accounts.
+
+
 
 III. Preparing the Break Glass Codefresh Pipeline (50 words)
 Assuming you have an existing break glass Codefresh pipeline, we will add a new step to identify and delete GCP service accounts created by partial Terraform execution.
