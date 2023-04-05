@@ -8,21 +8,26 @@ configure_and_delete_buckets:
     - |
       function force_delete_bucket() {
         local BUCKET_NAME="$1"
-        echo "Deleting all objects in the bucket: ${BUCKET_NAME}"
+        echo "Preparing to delete bucket: ${BUCKET_NAME}"
         
+        # Disable versioning
+        echo "Disabling versioning for bucket: ${BUCKET_NAME}"
+        gsutil versioning set off "gs://${BUCKET_NAME}"
+
+        # Remove retention policy
+        echo "Removing retention policy for bucket: ${BUCKET_NAME}"
+        gsutil retention clear "gs://${BUCKET_NAME}"
+
+        # Remove object holds (event-based and temporary)
+        echo "Removing object holds for bucket: ${BUCKET_NAME}"
+        gsutil -m setmeta -h "x-goog-event-based-hold:false" -h "x-goog-temporary-hold:false" "gs://${BUCKET_NAME}/**"
+
         # Delete all objects within the bucket
+        echo "Deleting all objects in the: ${BUCKET_NAME}"
         gsutil -m rm -r "gs://${BUCKET_NAME}/**"
 
-        echo "Deleting the bucket: ${BUCKET_NAME}"
-        
         # Delete the bucket itself
+        echo "Deleting the bucket: ${BUCKET_NAME}"
         gsutil rb "gs://${BUCKET_NAME}"
       }
 
-      BUCKET_NAME_1="your-bucket-name-1"
-      BUCKET_NAME_2="your-bucket-name-2"
-
-      force_delete_bucket "${BUCKET_NAME_1}"
-      force_delete_bucket "${BUCKET_NAME_2}"
-
-      echo "Both buckets have been forcefully deleted."
