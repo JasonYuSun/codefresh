@@ -6,9 +6,9 @@ configure_and_delete_buckets:
     - "gcloud auth activate-service-account --key-file=${{GCLOUD_SERVICE_ACCOUNT_KEY}}"
     - "gcloud config set project $GCLOUD_PROJECT"
     - |
-      function force_delete_bucket() {
+      function force_direct_bucket() {
         local BUCKET_NAME="$1"
-        echo "Preparing to delete bucket: ${BUCKET_NAME}"
+        echo "Preparing to force delete bucket: ${BUCKET_NAME}"
         
         # Disable versioning
         echo "Disabling versioning for bucket: ${BUCKET_NAME}"
@@ -22,11 +22,13 @@ configure_and_delete_buckets:
         echo "Removing object holds for bucket: ${BUCKET_NAME}"
         gsutil -m setmeta -h "x-goog-event-based-hold:false" -h "x-goog-temporary-hold:false" "gs://${BUCKET_NAME}/**"
 
-        # Delete all objects within the bucket
-        echo "Deleting all objects in the: ${BUCKET_NAME}"
-        gsutil -m rm -r "gs://${BUCKET_NAME}/**"
+        # Delete all noncurrent object versions
+        echo "Listing and deleting all noncurrent object versions in the bucket: ${BUCKET_NAME}"
+        gsutil ls -a "gs://${BUCKET_NAME}/**" | grep "#${BUCKET_NAME}" | gsutil -m rm -I
 
-        # Delete the bucket itself
+        # Delete the live objects and the bucket
+        echo "Deleting all live objects in the bucket: ${BUCKET_NAME}"
+        gsutil -m rm -r "gs://${BUCKET_NAME}/**"
         echo "Deleting the bucket: ${BUCKET_NAME}"
         gsutil rb "gs://${BUCKET_NAME}"
       }
