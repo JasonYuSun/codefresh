@@ -1,1 +1,1 @@
-Why was the CryptoKeyVersion's state set to DESTROY_SCHEDULED when the user who raised the issue applied the change?
+Hence, before the error code with CryptoKeyVersion in a DESTROY_SCHEDULED state appeared, a request to destroy the CryptoKeyVersion had already been submitted to GCP.
