@@ -1,1 +1,1 @@
-Why is Terraform trying to destroy a CryptoKeyVersion that doesn't exist in the state file? What is the connection between removing a GCS bucket and destroying a CryptoKeyVersion? Why has this error only occurred in the preprod-k environment?
+Why was the CryptoKeyVersion's state set to DESTROY_SCHEDULED when the user who raised the issue applied the change?
