@@ -1,3 +1,12 @@
+### Step 1: Waiting for scheduled destruction.
+The error might resolve itself once the scheduled destruction time passes. During each pipeline build, Terraform updates resources based on the codebase and state file. It tries to destroy the CryptoKeyVersion, as it expects the state to be "DESTROYED." Once the state changes from 'DESTROY_SCHEDULED' to 'DESTROYED,' Terraform should stop attempting deletion and the error should vanish. The team decided to rerun the pipeline after a long weekend to test this hypothesis.
+
+The rerun pipelines failed with a different error message:
+```
+googleapi: Error 400: The request cannot be fulfilled. Resource projects/anz-x-fabric-p-641432/locations/australia-southeast1/keyRings/fabric-ges-key-ring-preprod-k/cryptoKeys/storage-crypto-key-fabric-profile-picture-preprod-k-293738/cryptoKeyVersions/1 has value DESTROVED in field crypto_key_version.state.
+```
+
+The error message implies that cryptoKeyVersions doesn't exist in Terraform's state file. Terraform attempts to destroy it because other resources' state is different from the desired state, which should be related to destroying the GCS bucket.
 
 ### Step 2: Investigate the connection between removing a GCS bucket and destroying a CryptoKeyVersion.
 
